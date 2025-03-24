@@ -17,13 +17,14 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newProject, setNewProject] = useState({
+    id: null, // Add id to newProject state
     name: '',
     funding: '',
     priority: 1,
     guide: '',
     status: '⬜',
   });
-  const [editIndex, setEditIndex] = useState(null);
+  const [editId, setEditId] = useState(null); // Replace editIndex with editId
   const [theme, setTheme] = useState('teal');
   const [mode, setMode] = useState('dark');
 
@@ -54,21 +55,28 @@ function App() {
     project.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const openModal = (project = null, index = null) => {
+  const openModal = (project = null) => {
     if (project) {
       setNewProject({ ...project });
-      setEditIndex(index);
+      setEditId(project.id); // Store the project's id instead of index
     } else {
-      setNewProject({ name: '', funding: '', priority: 1, guide: '', status: '⬜' });
-      setEditIndex(null);
+      setNewProject({
+        id: Date.now(), // Generate a unique ID for new projects
+        name: '',
+        funding: '',
+        priority: 1,
+        guide: '',
+        status: '⬜',
+      });
+      setEditId(null);
     }
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
-    setNewProject({ name: '', funding: '', priority: 1, guide: '', status: '⬜' });
-    setEditIndex(null);
+    setNewProject({ id: null, name: '', funding: '', priority: 1, guide: '', status: '⬜' });
+    setEditId(null);
   };
 
   const handleInputChange = (e) => {
@@ -83,39 +91,49 @@ function App() {
 
   const saveProject = () => {
     if (!newProject.name.trim()) return;
-    if (editIndex !== null) {
-      const updatedProjects = [...projects];
-      updatedProjects[editIndex] = {
-        ...newProject,
-        funding: newProject.funding || 'N/A',
-        guide: newProject.guide || 'N/A',
-      };
-      setProjects(updatedProjects);
+    const projectToSave = {
+      ...newProject,
+      funding: newProject.funding || 'N/A',
+      guide: newProject.guide || 'N/A',
+    };
+
+    if (editId !== null) {
+      // Update existing project
+      setProjects(projects.map(project =>
+        project.id === editId ? projectToSave : project
+      ));
     } else {
-      setProjects([...projects, {
-        ...newProject,
-        funding: newProject.funding || 'N/A',
-        guide: newProject.guide || 'N/A',
-      }]);
+      // Add new project
+      setProjects([...projects, projectToSave]);
     }
     closeModal();
   };
 
-  const deleteProject = (index, isCompleted = false) => {
+  const deleteProject = (id, isCompleted = false) => {
     if (isCompleted) {
-      setCompletedProjects(completedProjects.filter((_, i) => i !== index));
+      setCompletedProjects(completedProjects.filter(project => project.id !== id));
     } else {
-      setProjects(projects.filter((_, i) => i !== index));
+      setProjects(projects.filter(project => project.id !== id));
     }
   };
 
-  const toggleStatus = (index, project) => {
+  const toggleStatus = (id) => {
+    // Find the project in either projects or completedProjects
+    const projectInActive = projects.find(project => project.id === id);
+    const projectInCompleted = completedProjects.find(project => project.id === id);
+
+    const project = projectInActive || projectInCompleted;
+    if (!project) return; // Project not found
+
     const updatedProject = { ...project, status: project.status === '⬜' ? '✅' : '⬜' };
+
     if (updatedProject.status === '✅') {
-      setProjects(projects.filter((_, i) => i !== index));
+      // Move from active to completed
+      setProjects(projects.filter(project => project.id !== id));
       setCompletedProjects([...completedProjects, updatedProject]);
     } else {
-      setCompletedProjects(completedProjects.filter((_, i) => i !== index));
+      // Move from completed to active
+      setCompletedProjects(completedProjects.filter(project => project.id !== id));
       setProjects([...projects, updatedProject]);
     }
   };
@@ -215,8 +233,8 @@ function App() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredProjects.map((project, index) => (
-                    <tr key={index}>
+                  {filteredProjects.map((project) => (
+                    <tr key={project.id}> {/* Use project.id as the key */}
                       <td>{project.name}</td>
                       <td>{project.funding}</td>
                       <td>{renderStars(project.priority)}</td>
@@ -224,17 +242,17 @@ function App() {
                       <td>
                         <span
                           className="status"
-                          onClick={() => toggleStatus(index, project)}
+                          onClick={() => toggleStatus(project.id)}
                           style={{ cursor: 'pointer' }}
                         >
                           {project.status}
                         </span>
                       </td>
                       <td>
-                        <button className="edit-btn" onClick={() => openModal(project, index)}>
+                        <button className="edit-btn" onClick={() => openModal(project)}>
                           <FaEdit />
                         </button>
-                        <button className="delete-btn" onClick={() => deleteProject(index)}>
+                        <button className="delete-btn" onClick={() => deleteProject(project.id)}>
                           <FaTrash />
                         </button>
                       </td>
@@ -262,8 +280,8 @@ function App() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredCompletedProjects.map((project, index) => (
-                    <tr key={index}>
+                  {filteredCompletedProjects.map((project) => (
+                    <tr key={project.id}> {/* Use project.id as the key */}
                       <td>{project.name}</td>
                       <td>{project.funding}</td>
                       <td>{renderStars(project.priority)}</td>
@@ -271,14 +289,14 @@ function App() {
                       <td>
                         <span
                           className="status"
-                          onClick={() => toggleStatus(index, project)}
+                          onClick={() => toggleStatus(project.id)}
                           style={{ cursor: 'pointer' }}
                         >
                           {project.status}
                         </span>
                       </td>
                       <td>
-                        <button className="delete-btn" onClick={() => deleteProject(index, true)}>
+                        <button className="delete-btn" onClick={() => deleteProject(project.id, true)}>
                           <FaTrash />
                         </button>
                       </td>
