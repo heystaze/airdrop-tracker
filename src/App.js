@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import { FaTrash, FaEdit, FaStar, FaClipboardList } from 'react-icons/fa';
-
+import { Analytics } from "@vercel/analytics/react"
 function App() {
   const [projects, setProjects] = useState(() => {
     const savedProjects = JSON.parse(localStorage.getItem('projects'));
@@ -337,7 +337,7 @@ function App() {
           </div>
         </div>
       )}
-
+        <Analytics />
       {/* Footer Section */}
       <footer className="footer">
         <p>
