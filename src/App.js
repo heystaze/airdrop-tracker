@@ -345,13 +345,13 @@ function App() {
       {/* Footer Section */}
       <footer className="footer">
         <p>
-          Inspired by an airdrop tracking website • Developed and Enhanced by{' '}
-          <a href="https://x.com/Zun2025" target="_blank" rel="noopener noreferrer" className="footer-link">
-            Zun
-          </a>
-          {' '}• Modified by{' '}
+          • Modified by{' '}
           <a href="https://x.com/heyst3ze" target="_blank" rel="noopener noreferrer" className="footer-link">
-            heystaze
+          heystaze
+          </a>
+          {' '}• Inspired by{' '}
+          <a href="https://x.com/Zun2025" target="_blank" rel="noopener noreferrer" className="footer-link">
+          Zun
           </a>
         </p>
       </footer>
