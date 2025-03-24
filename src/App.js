@@ -17,16 +17,17 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newProject, setNewProject] = useState({
-    id: null, // Add id to newProject state
+    id: null,
     name: '',
     funding: '',
     priority: 1,
     guide: '',
     status: '⬜',
   });
-  const [editId, setEditId] = useState(null); // Replace editIndex with editId
+  const [editId, setEditId] = useState(null);
   const [theme, setTheme] = useState('teal');
   const [mode, setMode] = useState('dark');
+  const [isManageDropdownOpen, setIsManageDropdownOpen] = useState(false); // State for dropdown
 
   useEffect(() => {
     localStorage.setItem('projects', JSON.stringify(projects));
@@ -58,10 +59,10 @@ function App() {
   const openModal = (project = null) => {
     if (project) {
       setNewProject({ ...project });
-      setEditId(project.id); // Store the project's id instead of index
+      setEditId(project.id);
     } else {
       setNewProject({
-        id: Date.now(), // Generate a unique ID for new projects
+        id: Date.now(),
         name: '',
         funding: '',
         priority: 1,
@@ -98,12 +99,10 @@ function App() {
     };
 
     if (editId !== null) {
-      // Update existing project
       setProjects(projects.map(project =>
         project.id === editId ? projectToSave : project
       ));
     } else {
-      // Add new project
       setProjects([...projects, projectToSave]);
     }
     closeModal();
@@ -118,24 +117,64 @@ function App() {
   };
 
   const toggleStatus = (id) => {
-    // Find the project in either projects or completedProjects
     const projectInActive = projects.find(project => project.id === id);
     const projectInCompleted = completedProjects.find(project => project.id === id);
 
     const project = projectInActive || projectInCompleted;
-    if (!project) return; // Project not found
+    if (!project) return;
 
     const updatedProject = { ...project, status: project.status === '⬜' ? '✅' : '⬜' };
 
     if (updatedProject.status === '✅') {
-      // Move from active to completed
       setProjects(projects.filter(project => project.id !== id));
       setCompletedProjects([...completedProjects, updatedProject]);
     } else {
-      // Move from completed to active
       setCompletedProjects(completedProjects.filter(project => project.id !== id));
       setProjects([...projects, updatedProject]);
     }
+  };
+
+  // Export function
+  const exportProjects = () => {
+    const data = {
+      projects,
+      completedProjects,
+    };
+    const jsonString = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'airdrop-tracker-data.json';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    setIsManageDropdownOpen(false); // Close dropdown after action
+  };
+
+  // Import function
+  const importProjects = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (data.projects && Array.isArray(data.projects)) {
+          setProjects(data.projects);
+        }
+        if (data.completedProjects && Array.isArray(data.completedProjects)) {
+          setCompletedProjects(data.completedProjects);
+        }
+        alert('Projects imported successfully!');
+      } catch (error) {
+        alert('Error importing file: Invalid JSON format.');
+      }
+    };
+    reader.readAsText(file);
+    setIsManageDropdownOpen(false); // Close dropdown after action
   };
 
   const renderStars = (priority) => {
@@ -184,7 +223,6 @@ function App() {
 
   return (
     <div className={`App ${mode} ${theme}`}>
-      {/* Header Section with Title and Toggles */}
       <div className="header">
         <h1>Airdrop Tracker</h1>
         <div className="theme-toggle">
@@ -199,10 +237,32 @@ function App() {
             <option value="dark">Dark</option>
             <option value="light">Light</option>
           </select>
+          {/* Manage Projects Dropdown */}
+          <div className="manage-projects">
+            <button
+              className="manage-btn"
+              onClick={() => setIsManageDropdownOpen(!isManageDropdownOpen)}
+            >
+              Manage Projects
+            </button>
+            {isManageDropdownOpen && (
+              <div className="manage-dropdown">
+                <button onClick={exportProjects}>Export Projects</button>
+                <label className="import-option">
+                  Import Projects
+                  <input
+                    type="file"
+                    accept=".json"
+                    onChange={importProjects}
+                    style={{ display: 'none' }}
+                  />
+                </label>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Search Bar */}
       <div className="search-bar">
         <input
           type="text"
@@ -234,7 +294,7 @@ function App() {
                 </thead>
                 <tbody>
                   {filteredProjects.map((project) => (
-                    <tr key={project.id}> {/* Use project.id as the key */}
+                    <tr key={project.id}>
                       <td>{project.name}</td>
                       <td>{project.funding}</td>
                       <td>{renderStars(project.priority)}</td>
@@ -281,7 +341,7 @@ function App() {
                 </thead>
                 <tbody>
                   {filteredCompletedProjects.map((project) => (
-                    <tr key={project.id}> {/* Use project.id as the key */}
+                    <tr key={project.id}>
                       <td>{project.name}</td>
                       <td>{project.funding}</td>
                       <td>{renderStars(project.priority)}</td>
@@ -359,7 +419,6 @@ function App() {
 
       <Analytics />
 
-      {/* Footer Section */}
       <footer className="footer">
         <p>
           • Modified by{' '}
