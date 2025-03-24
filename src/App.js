@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import { FaTrash, FaEdit, FaStar, FaClipboardList } from 'react-icons/fa';
-import { Analytics } from "@vercel/analytics/react"
+import { Analytics } from "@vercel/analytics/react";
 
 function App() {
   const [projects, setProjects] = useState(() => {
@@ -338,17 +338,19 @@ function App() {
           </div>
         </div>
       )}
-          <Analytics />
+
+      <Analytics />
+
       {/* Footer Section */}
       <footer className="footer">
         <p>
-        • Modified by{' '}
+          • Modified by{' '}
           <a href="https://x.com/heyst3ze" target="_blank" rel="noopener noreferrer" className="footer-link">
-          heystaze
+            heystaze
           </a>
           {' '}• Inspired by{' '}
           <a href="https://x.com/Zun2025" target="_blank" rel="noopener noreferrer" className="footer-link">
-          Zun
+            Zun
           </a>
         </p>
       </footer>
