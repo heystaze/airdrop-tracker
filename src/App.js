@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import { FaTrash, FaEdit, FaStar, FaClipboardList } from 'react-icons/fa';
+import { Analytics } from '@vercel/analytics/react'; // Import the Analytics component
 
 function App() {
   const [projects, setProjects] = useState(() => {
@@ -338,16 +339,19 @@ function App() {
         </div>
       )}
 
+      {/* Add the Analytics component */}
+      <Analytics />
+
       {/* Footer Section */}
       <footer className="footer">
         <p>
-        Modified by{' '}
-          <a href="https://x.com/heyst3ze" target="_blank" rel="noopener noreferrer" className="footer-link">
-          heystaze
-          </a>
-          {' '}• Created by{' '}
+          Inspired by an airdrop tracking website • Developed and Enhanced by{' '}
           <a href="https://x.com/Zun2025" target="_blank" rel="noopener noreferrer" className="footer-link">
-          Zun
+            Zun
+          </a>
+          {' '}• Modified by{' '}
+          <a href="https://x.com/heyst3ze" target="_blank" rel="noopener noreferrer" className="footer-link">
+            heystaze
           </a>
         </p>
       </footer>
